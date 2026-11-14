@@ -20,6 +20,7 @@ import { download, svgToPng, toJson, toSvg } from '../model/export';
 import { GRID, bounds, fitView, screenToWorld, zoomAt } from '../model/geometry';
 import { commit, createHistory, redo, seal, undo, type History } from '../model/history';
 import { loadDoc, saveDoc } from '../model/storage';
+import { count } from './dom';
 import { emptySelection, shapeLabel, type Color, type DiagramNode, type Doc, type Point, type Selection, type Shape, type Viewport } from '../model/types';
 
 type Clipboard = { nodes: DiagramNode[]; edges: Doc['edges'] } | null;
@@ -97,7 +98,7 @@ export function useEditor() {
 
   const selectAll = useCallback(() => {
     setSelection({ nodes: doc.nodes.map((n) => n.id), edges: doc.edges.map((e) => e.id) });
-    announce(`Selected ${doc.nodes.length} shapes and ${doc.edges.length} connectors.`);
+    announce(`Selected ${count(doc.nodes.length, 'shape')} and ${count(doc.edges.length, 'connector')}.`);
   }, [doc, announce]);
 
   const clearSelection = useCallback(() => setSelection(emptySelection), []);
@@ -122,7 +123,7 @@ export function useEditor() {
   const deleteSelected = useCallback(() => {
     if (!selection.nodes.length && !selection.edges.length) return;
     change((current) => deleteSelection(current, selection));
-    announce(`Deleted ${selection.nodes.length} shapes and ${selection.edges.length} connectors.`);
+    announce(`Deleted ${count(selection.nodes.length, 'shape')} and ${count(selection.edges.length, 'connector')}.`);
     clearSelection();
   }, [selection, change, announce, clearSelection]);
 
@@ -140,7 +141,7 @@ export function useEditor() {
     const result = duplicate(doc, selection.nodes);
     change(result.doc);
     selectOnly({ nodes: result.ids });
-    announce(`Duplicated ${result.ids.length} shapes.`);
+    announce(`Duplicated ${count(result.ids.length, 'shape')}.`);
   }, [doc, selection, change, selectOnly, announce]);
 
   const copy = useCallback(() => {
@@ -148,7 +149,7 @@ export function useEditor() {
     if (!nodes.length) return;
     const ids = new Set(nodes.map((n) => n.id));
     clipboard.current = { nodes, edges: doc.edges.filter((e) => ids.has(e.from) && ids.has(e.to)) };
-    announce(`Copied ${nodes.length} shapes.`);
+    announce(`Copied ${count(nodes.length, 'shape')}.`);
   }, [doc, selection, announce]);
 
   const paste = useCallback(() => {
@@ -166,7 +167,7 @@ export function useEditor() {
     }));
     clipboard.current = { nodes: pasted, edges: result.doc.edges.filter((e) => pastedIds.has(e.from)) };
     selectOnly({ nodes: result.ids });
-    announce(`Pasted ${pasted.length} shapes.`);
+    announce(`Pasted ${count(pasted.length, 'shape')}.`);
   }, [change, selectOnly, announce]);
 
   const cut = useCallback(() => {
@@ -208,7 +209,7 @@ export function useEditor() {
   const alignSelected = useCallback(
     (how: Alignment) => {
       change(align(doc, selection.nodes, how));
-      announce(`Aligned ${selection.nodes.length} shapes (${how}).`);
+      announce(`Aligned ${count(selection.nodes.length, 'shape')} (${how}).`);
     },
     [doc, selection, change, announce],
   );
@@ -216,7 +217,7 @@ export function useEditor() {
   const distributeSelected = useCallback(
     (axis: 'x' | 'y') => {
       change(distribute(doc, selection.nodes, axis));
-      announce(`Distributed ${selection.nodes.length} shapes ${axis === 'x' ? 'horizontally' : 'vertically'}.`);
+      announce(`Distributed ${count(selection.nodes.length, 'shape')} ${axis === 'x' ? 'horizontally' : 'vertically'}.`);
     },
     [doc, selection, change, announce],
   );
@@ -285,7 +286,7 @@ export function useEditor() {
         change(next);
         clearSelection();
         fit(next);
-        announce(`Imported ${next.nodes.length} shapes and ${next.edges.length} connectors.`);
+        announce(`Imported ${count(next.nodes.length, 'shape')} and ${count(next.edges.length, 'connector')}.`);
       } catch (error) {
         const reason = error instanceof SyntaxError ? 'The file is not valid JSON.' : (error as Error).message;
         announce(`Import failed. ${reason}`, 'error');

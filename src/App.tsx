@@ -3,6 +3,7 @@ import { Canvas } from './components/Canvas';
 import { Inspector } from './components/Inspector';
 import { Toolbar } from './components/Toolbar';
 import { EditorContext, useEditorContext } from './editor/context';
+import { count } from './editor/dom';
 import { useEditor } from './editor/useEditor';
 import { shortcuts, useShortcuts } from './editor/useShortcuts';
 
@@ -68,7 +69,7 @@ function StatusBar() {
   const status = connectFrom
     ? 'Connecting: click or Tab to a shape and press Enter. Escape cancels.'
     : selection.nodes.length || selection.edges.length
-      ? `${selection.nodes.length} shapes, ${selection.edges.length} connectors selected`
+      ? `${count(selection.nodes.length, 'shape')}, ${count(selection.edges.length, 'connector')} selected`
       : 'Nothing selected';
 
   return (

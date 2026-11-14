@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import { useEditorContext } from '../editor/context';
+import { count } from '../editor/dom';
 import type { Alignment } from '../model/doc';
 import { COLORS, SHAPES, shapeLabel, type DiagramNode } from '../model/types';
 import { Icon, type IconName } from './Icon';
@@ -27,7 +28,7 @@ export function Inspector() {
         <section className="panel">
           <h2 className="panel__title">Diagram</h2>
           <p className="panel__stat">
-            {doc.nodes.length} shapes · {doc.edges.length} connectors
+            {count(doc.nodes.length, 'shape')} · {count(doc.edges.length, 'connector')}
           </p>
           <ul className="panel__tips">
             <li>Double-click the canvas to add a box.</li>
